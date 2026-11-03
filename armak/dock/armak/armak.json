@@ -1,0 +1,39 @@
+{
+ "app": "armak",
+ "creation": "2026-11-03 12:06:46.433703",
+ "docstatus": 0,
+ "doctype": "Dock",
+ "idx": 0,
+ "items": [
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "wrench",
+   "link_to": "Workshop",
+   "link_type": "Sidebar",
+   "title": "Workshop"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "chart-column",
+   "link_to": "Workshop Reports",
+   "link_type": "Sidebar",
+   "title": "Workshop Reports"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "settings",
+   "link_to": "Workshop Setup",
+   "link_type": "Sidebar",
+   "title": "Workshop Setup"
+  }
+ ],
+ "modified": "2026-11-03 12:06:46.433703",
+ "modified_by": "Administrator",
+ "name": "armak",
+ "owner": "Administrator",
+ "standard": 1,
+ "user": ""
+}

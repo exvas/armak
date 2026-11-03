@@ -93,6 +93,7 @@ frappe.ui.form.on("Repair Order Service", {
 		frappe
 			.call("armak.workshop.doctype.repair_order.repair_order.get_service_rate", {
 				item_code: row.service_item,
+				company: frm.doc.company,
 			})
 			.then(({ message }) => frappe.model.set_value(cdt, cdn, "rate", message || 0));
 	},

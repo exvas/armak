@@ -13,6 +13,28 @@ SERVICE = "_Test Black Painting"
 PAINT = "_Test Black Paint"
 
 
+def selling_price_list():
+	"""A selling price list in the company currency (ERPNext's v16 test data makes its lists INR)."""
+	from armak.workshop.doctype.repair_order.repair_order import get_price_list
+
+	price_list = get_price_list(COMPANY)
+	if not price_list:
+		price_list = (
+			frappe.get_doc(
+				{
+					"doctype": "Price List",
+					"price_list_name": "_Test Workshop Selling",
+					"currency": frappe.db.get_value("Company", COMPANY, "default_currency"),
+					"selling": 1,
+					"enabled": 1,
+				}
+			)
+			.insert()
+			.name
+		)
+	return price_list
+
+
 def make_item(item_code, is_stock_item, rate=0):
 	if not frappe.db.exists("Item", item_code):
 		frappe.get_doc(
@@ -26,7 +48,7 @@ def make_item(item_code, is_stock_item, rate=0):
 			}
 		).insert()
 	if rate:
-		price_list = frappe.db.get_single_value("Selling Settings", "selling_price_list")
+		price_list = selling_price_list()
 		if not frappe.db.exists("Item Price", {"item_code": item_code, "price_list": price_list}):
 			frappe.get_doc(
 				{
@@ -149,6 +171,8 @@ class TestRepairOrder(FrappeTestCase):
 		self.assertEqual(order.status, "Delivered")
 		si = frappe.get_doc("Sales Invoice", order.sales_invoice)
 		self.assertEqual(si.docstatus, 1)
+		self.assertEqual(si.currency, frappe.db.get_value("Company", COMPANY, "default_currency"))
+		self.assertEqual(flt(si.items[0].rate), 20)
 		self.assertEqual(flt(si.outstanding_amount), 0)
 		self.assertEqual(flt(si.total_advance), 5)
 		self.assertEqual(flt(order.balance), 0)

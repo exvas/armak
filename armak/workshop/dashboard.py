@@ -47,12 +47,13 @@ def todays_collections(filters: str | dict | list | None = None):
 	"""Advances and balances taken on Repair Orders today."""
 	if not frappe.has_permission("Payment Entry"):
 		return _card(0, "Currency")
-	rows = frappe.get_list(
+	amounts = frappe.get_list(
 		"Payment Entry",
 		filters={"docstatus": 1, "posting_date": nowdate(), "armak_repair_order": ("is", "set")},
-		fields=["sum(base_paid_amount) as total"],
+		pluck="base_paid_amount",
+		limit_page_length=0,
 	)
-	return _card(flt(rows[0].total) if rows else 0, "Currency")
+	return _card(sum(flt(a) for a in amounts), "Currency")
 
 
 @frappe.whitelist()
@@ -60,12 +61,13 @@ def unpaid_balance(filters: str | dict | list | None = None):
 	"""Balance still to collect on open orders (advances deducted)."""
 	if not frappe.has_permission("Repair Order"):
 		return _card(0, "Currency")
-	rows = frappe.get_list(
+	balances = frappe.get_list(
 		"Repair Order",
 		filters={"docstatus": 1, "status": ("in", OPEN_STATUSES)},
-		fields=["sum(balance) as total"],
+		pluck="balance",
+		limit_page_length=0,
 	)
-	return _card(flt(rows[0].total) if rows else 0, "Currency")
+	return _card(sum(flt(b) for b in balances), "Currency")
 
 
 @frappe.whitelist()
@@ -134,11 +136,13 @@ def get_board_data(branch: str | None = None):
 		order.late = order.status in WORKING_STATUSES and get_datetime(order.expected_delivery) < now
 		order.due_today = getdate(order.expected_delivery) == getdate(now)
 
+	# SQL aggregates in get_list fields are refused on Frappe 16; a day's deliveries are few
 	delivered_today = frappe.get_list(
 		"Repair Order",
 		filters={**filters, "status": "Delivered", "delivered_on": (">=", getdate(now))},
-		fields=["count(name) as n", "sum(grand_total) as amount"],
-	)[0]
+		pluck="grand_total",
+		limit_page_length=0,
+	)
 
 	return {
 		"orders": orders,
@@ -147,8 +151,8 @@ def get_board_data(branch: str | None = None):
 			"ready": sum(1 for o in orders if o.status == "Ready for Delivery"),
 			"late": sum(1 for o in orders if o.late),
 			"due_today": sum(1 for o in orders if o.due_today and o.status in WORKING_STATUSES),
-			"delivered_today": delivered_today.n or 0,
-			"delivered_today_amount": flt(delivered_today.amount),
+			"delivered_today": len(delivered_today),
+			"delivered_today_amount": sum(flt(t) for t in delivered_today),
 			"unpaid": sum(flt(o.balance) for o in orders),
 		},
 		"low_stock": get_low_stock(limit=8),

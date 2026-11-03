@@ -1,0 +1,19 @@
+{
+ "app": "armak",
+ "creation": "2026-11-03 12:06:46.433703",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "App",
+ "idx": 20,
+ "label": "Armak",
+ "link": "/desk/workshop",
+ "link_type": "External",
+ "logo_url": "/assets/armak/images/armak-logo.svg",
+ "modified": "2026-11-03 12:06:46.433703",
+ "modified_by": "Administrator",
+ "name": "Armak",
+ "owner": "Administrator",
+ "roles": [],
+ "standard": 1
+}

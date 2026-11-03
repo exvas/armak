@@ -18,11 +18,8 @@ jobs:
     uses: exvas/ci-workflows/.github/workflows/frappe-app.yml@v1
     with:
       app: armak
-      frappe_versions: '["version-15"]'
-      draft_frappe_versions: '["version-15"]'
+      frappe_versions: '["version-15", "version-16"]'
+      draft_frappe_versions: '["version-16"]'
       hrms: true
       runs_on: '"ubuntu-latest"'
-      require_tests: true
-      # the tests build their own data on the setup-wizard company; ERPNext's test-record tree
-      # needs apps this bench does not install (Payment Gateway)
-      run_tests_args: "--skip-test-records"
+      require_tests: true  # armak/tests build their own data on the setup-wizard company
