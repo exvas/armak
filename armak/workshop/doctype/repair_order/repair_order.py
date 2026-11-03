@@ -117,6 +117,7 @@ class RepairOrder(Document):
 	def set_template_materials(self):
 		"""Add the template materials of every service that has none on the order yet."""
 		covered = {row.for_service for row in self.materials if row.from_template}
+		rows = []
 		for service in self.services:
 			if service.service_item in covered:
 				continue
@@ -126,8 +127,7 @@ class RepairOrder(Document):
 			if not template:
 				continue
 			for item in frappe.get_doc("Service Material Template", template).items:
-				self.append(
-					"materials",
+				rows.append(
 					{
 						"item_code": item.item_code,
 						"item_name": item.item_name,
@@ -138,6 +138,8 @@ class RepairOrder(Document):
 					},
 				)
 			covered.add(service.service_item)
+		for row in rows:
+			self.append("materials", row)
 
 	def validate_materials(self):
 		before = self.get_doc_before_save()
@@ -154,7 +156,7 @@ class RepairOrder(Document):
 			frappe.throw(_("A {0} order cannot be moved to {1}").format(self.status, status))
 
 	@frappe.whitelist()
-	def start_work(self, technician=None):
+	def start_work(self, technician: str | None = None):
 		self.check_permission("write")
 		self._move_to("In Progress")
 		if technician:
@@ -176,7 +178,7 @@ class RepairOrder(Document):
 		return self.stock_entry
 
 	@frappe.whitelist()
-	def receive_advance(self, amount, mode_of_payment):
+	def receive_advance(self, amount: float, mode_of_payment: str):
 		"""Book a customer advance for this order (allocated to its invoice on delivery)."""
 		self.check_permission("write")
 		if self.status in ("Delivered", "Cancelled") or self.docstatus != 1:
@@ -189,7 +191,7 @@ class RepairOrder(Document):
 		return payment.name
 
 	@frappe.whitelist()
-	def deliver(self, mode_of_payment=None, amount_paid=0):
+	def deliver(self, mode_of_payment: str | None = None, amount_paid: float = 0):
 		"""Hand the gun back: invoice the services (advances allocated) and take the balance."""
 		self.check_permission("write")
 		self._move_to("Delivered")
@@ -359,7 +361,7 @@ def make_advance_payment(order, amount, mode_of_payment):
 
 
 @frappe.whitelist()
-def get_service_rate(item_code, price_list=None):
+def get_service_rate(item_code: str, price_list: str | None = None):
 	price_list = price_list or frappe.db.get_single_value("Selling Settings", "selling_price_list")
 	return flt(
 		frappe.db.get_value(
@@ -369,6 +371,6 @@ def get_service_rate(item_code, price_list=None):
 
 
 @frappe.whitelist()
-def get_branch_company(branch):
+def get_branch_company(branch: str):
 	row = get_branch_settings(branch)
 	return row.company if row else None

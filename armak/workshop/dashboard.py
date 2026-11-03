@@ -26,24 +26,24 @@ def _card(value, fieldtype="Int"):
 
 
 @frappe.whitelist()
-def open_orders(filters=None):
+def open_orders(filters: str | dict | list | None = None):
 	return _card(_count(docstatus=1, status=("in", WORKING_STATUSES)))
 
 
 @frappe.whitelist()
-def ready_for_delivery(filters=None):
+def ready_for_delivery(filters: str | dict | list | None = None):
 	return _card(_count(docstatus=1, status="Ready for Delivery"))
 
 
 @frappe.whitelist()
-def late_orders(filters=None):
+def late_orders(filters: str | dict | list | None = None):
 	return _card(
 		_count(docstatus=1, status=("in", WORKING_STATUSES), expected_delivery=("<", now_datetime()))
 	)
 
 
 @frappe.whitelist()
-def todays_collections(filters=None):
+def todays_collections(filters: str | dict | list | None = None):
 	"""Advances and balances taken on Repair Orders today."""
 	if not frappe.has_permission("Payment Entry"):
 		return _card(0, "Currency")
@@ -56,7 +56,7 @@ def todays_collections(filters=None):
 
 
 @frappe.whitelist()
-def unpaid_balance(filters=None):
+def unpaid_balance(filters: str | dict | list | None = None):
 	"""Balance still to collect on open orders (advances deducted)."""
 	if not frappe.has_permission("Repair Order"):
 		return _card(0, "Currency")
@@ -69,7 +69,7 @@ def unpaid_balance(filters=None):
 
 
 @frappe.whitelist()
-def low_stock_items(filters=None):
+def low_stock_items(filters: str | dict | list | None = None):
 	return _card(len(get_low_stock()))
 
 
@@ -96,7 +96,7 @@ def get_low_stock(limit=None):
 
 
 @frappe.whitelist()
-def get_board_data(branch=None):
+def get_board_data(branch: str | None = None):
 	frappe.has_permission("Repair Order", throw=True)
 	now = now_datetime()
 	filters = _branch_filters(branch)

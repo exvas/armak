@@ -12,15 +12,15 @@ PERIOD_START = {
 @frappe.whitelist()
 @cache_source
 def get(
-	chart_name=None,
-	chart=None,
-	no_cache=None,
-	filters=None,
-	from_date=None,
-	to_date=None,
-	timespan=None,
-	time_interval=None,
-	heatmap_year=None,
+	chart_name: str | None = None,
+	chart: str | dict | None = None,
+	no_cache: int | bool | None = None,
+	filters: str | dict | list | None = None,
+	from_date: str | None = None,
+	to_date: str | None = None,
+	timespan: str | None = None,
+	time_interval: str | None = None,
+	heatmap_year: str | int | None = None,
 ):
 	"""Service revenue (excl. VAT) of orders delivered in the period, largest first."""
 	frappe.has_permission("Repair Order", throw=True)
