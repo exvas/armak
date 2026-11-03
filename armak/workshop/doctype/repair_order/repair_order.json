@@ -1,0 +1,466 @@
+{
+ "actions": [],
+ "creation": "2026-11-03 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "customer",
+  "customer_name",
+  "mobile_no",
+  "civil_id",
+  "column_break_customer",
+  "gun",
+  "gun_type",
+  "licence_no",
+  "column_break_status",
+  "status",
+  "posting_date",
+  "expected_delivery",
+  "section_branch",
+  "company",
+  "branch",
+  "column_break_branch",
+  "technician",
+  "currency",
+  "section_services",
+  "services",
+  "job_details",
+  "section_totals",
+  "taxes_and_charges",
+  "total",
+  "tax_amount",
+  "grand_total",
+  "column_break_payment",
+  "advance_paid",
+  "balance",
+  "section_materials",
+  "materials",
+  "section_signatures",
+  "customer_signature",
+  "column_break_signature",
+  "delivery_signature",
+  "section_links",
+  "stock_entry",
+  "sales_invoice",
+  "delivered_on",
+  "column_break_profit",
+  "material_cost",
+  "profit",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "RO-.YY.-",
+   "default": "RO-.YY.-",
+   "reqd": 1,
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1,
+   "in_standard_filter": 1,
+   "description": "Search by name, mobile or Civil ID."
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "fetch_from": "customer.customer_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "fetch_from": "customer.mobile_no",
+   "read_only": 1,
+   "in_global_search": 1
+  },
+  {
+   "fieldname": "civil_id",
+   "fieldtype": "Data",
+   "label": "Civil ID",
+   "fetch_from": "customer.armak_civil_id",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_customer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gun",
+   "fieldtype": "Link",
+   "label": "Gun Number",
+   "options": "Gun",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "in_global_search": 1
+  },
+  {
+   "fieldname": "gun_type",
+   "fieldtype": "Data",
+   "label": "Gun Type",
+   "fetch_from": "gun.gun_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "licence_no",
+   "fieldtype": "Data",
+   "label": "Licence No",
+   "fetch_from": "gun.licence_no",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nReceived\nIn Progress\nReady for Delivery\nDelivered\nCancelled",
+   "default": "Draft",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "no_copy": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Received On",
+   "default": "Today",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expected_delivery",
+   "fieldtype": "Datetime",
+   "label": "Expected Delivery",
+   "reqd": 1,
+   "in_list_view": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "section_branch",
+   "fieldtype": "Section Break",
+   "label": "Workshop",
+   "collapsible": 0
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "remember_last_selected_value": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "column_break_branch",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "technician",
+   "fieldtype": "Link",
+   "label": "Technician",
+   "options": "User",
+   "allow_on_submit": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "fetch_from": "company.default_currency",
+   "read_only": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "section_services",
+   "fieldtype": "Section Break",
+   "label": "Work Required"
+  },
+  {
+   "fieldname": "services",
+   "fieldtype": "Table",
+   "label": "Services",
+   "options": "Repair Order Service",
+   "reqd": 1
+  },
+  {
+   "fieldname": "job_details",
+   "fieldtype": "Small Text",
+   "label": "Job Details / Customer Complaint"
+  },
+  {
+   "fieldname": "section_totals",
+   "fieldtype": "Section Break",
+   "label": "Payment"
+  },
+  {
+   "fieldname": "taxes_and_charges",
+   "fieldtype": "Link",
+   "label": "Sales Taxes Template",
+   "options": "Sales Taxes and Charges Template",
+   "description": "VAT applied on the invoice."
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total (excl. VAT)",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "VAT",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "options": "currency",
+   "read_only": 1,
+   "bold": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_break_payment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "advance_paid",
+   "fieldtype": "Currency",
+   "label": "Advance Paid",
+   "options": "currency",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "balance",
+   "fieldtype": "Currency",
+   "label": "Balance",
+   "options": "currency",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "section_materials",
+   "fieldtype": "Section Break",
+   "label": "Materials Used",
+   "description": "Filled from the Service Material Templates. Adjust to the actual quantity used; they are issued from stock when the job is marked Ready for Delivery."
+  },
+  {
+   "fieldname": "materials",
+   "fieldtype": "Table",
+   "label": "Materials",
+   "options": "Repair Order Material",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "section_signatures",
+   "fieldtype": "Section Break",
+   "label": "Signatures",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "customer_signature",
+   "fieldtype": "Signature",
+   "label": "Customer Signature (Receiving)",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_signature",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_signature",
+   "fieldtype": "Signature",
+   "label": "Customer Signature (Collection)",
+   "allow_on_submit": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "section_links",
+   "fieldtype": "Section Break",
+   "label": "Accounting",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "stock_entry",
+   "fieldtype": "Link",
+   "label": "Material Issue",
+   "options": "Stock Entry",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "delivered_on",
+   "fieldtype": "Datetime",
+   "label": "Delivered On",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_profit",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "material_cost",
+   "fieldtype": "Currency",
+   "label": "Material Cost",
+   "options": "currency",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1,
+   "permlevel": 1
+  },
+  {
+   "fieldname": "profit",
+   "fieldtype": "Currency",
+   "label": "Profit",
+   "options": "currency",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1,
+   "permlevel": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "options": "Repair Order",
+   "read_only": 1,
+   "no_copy": 1,
+   "print_hide": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-11-03 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Workshop",
+ "name": "Repair Order",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "Workshop Counter",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "submit": 1,
+   "cancel": 1
+  },
+  {
+   "role": "Workshop Technician",
+   "read": 1,
+   "write": 1,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "submit": 0
+  },
+  {
+   "role": "Workshop Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Workshop Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "System Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "is_submittable": 1,
+ "search_fields": "customer_name,mobile_no,gun,status",
+ "title_field": "customer_name",
+ "show_title_field_in_link": 0,
+ "track_changes": 1,
+ "timeline_field": "customer",
+ "default_print_format": "Repair Order Bilingual"
+}

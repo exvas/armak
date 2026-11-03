@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "creation": "2026-11-03 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "default_branch",
+  "services_item_group",
+  "column_break_defaults",
+  "default_delivery_days",
+  "section_branches",
+  "branches"
+ ],
+ "fields": [
+  {
+   "fieldname": "default_branch",
+   "fieldtype": "Link",
+   "label": "Default Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "services_item_group",
+   "fieldtype": "Link",
+   "label": "Services Item Group",
+   "options": "Item Group",
+   "description": "Only items in this group are offered as services on a Repair Order."
+  },
+  {
+   "fieldname": "column_break_defaults",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_delivery_days",
+   "fieldtype": "Int",
+   "label": "Default Delivery (days)",
+   "default": "3"
+  },
+  {
+   "fieldname": "section_branches",
+   "fieldtype": "Section Break",
+   "label": "Branches"
+  },
+  {
+   "fieldname": "branches",
+   "fieldtype": "Table",
+   "label": "Branches",
+   "options": "Workshop Branch"
+  }
+ ],
+ "links": [],
+ "modified": "2026-11-03 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Workshop",
+ "name": "Workshop Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "Workshop Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Workshop Counter",
+   "read": 1
+  },
+  {
+   "role": "Workshop Technician",
+   "read": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "issingle": 1,
+ "track_changes": 1
+}

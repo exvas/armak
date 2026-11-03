@@ -8,7 +8,7 @@ app_license = "mit"
 # Apps
 # ------------------
 
-# required_apps = []
+required_apps = ["erpnext"]
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -74,16 +74,15 @@ app_license = "mit"
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "armak.utils.jinja_methods",
-# 	"filters": "armak.utils.jinja_filters"
-# }
+jinja = {"methods": ["armak.workshop.print_utils.qr_data_uri"]}
 
 # Installation
 # ------------
 
 # before_install = "armak.install.before_install"
-# after_install = "armak.install.after_install"
+after_install = "armak.install.after_install"
+after_migrate = "armak.install.after_migrate"
+before_tests = "armak.install.before_tests"
 
 # Uninstallation
 # ------------
@@ -246,4 +245,3 @@ app_license = "mit"
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
-

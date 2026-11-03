@@ -1,0 +1,195 @@
+{
+ "actions": [],
+ "creation": "2026-11-03 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "gun_number",
+  "customer",
+  "customer_name",
+  "mobile_no",
+  "column_break_owner",
+  "licence_no",
+  "licence_expiry",
+  "disabled",
+  "section_gun",
+  "gun_type",
+  "make",
+  "model",
+  "column_break_gun",
+  "calibre",
+  "image",
+  "section_notes",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "gun_number",
+   "fieldtype": "Data",
+   "label": "Gun Number",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Owner (Customer)",
+   "options": "Customer",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "fetch_from": "customer.customer_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "fetch_from": "customer.mobile_no",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_owner",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "licence_no",
+   "fieldtype": "Data",
+   "label": "Licence No"
+  },
+  {
+   "fieldname": "licence_expiry",
+   "fieldtype": "Date",
+   "label": "Licence Expiry"
+  },
+  {
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled",
+   "default": "0"
+  },
+  {
+   "fieldname": "section_gun",
+   "fieldtype": "Section Break",
+   "label": "Gun Details"
+  },
+  {
+   "fieldname": "gun_type",
+   "fieldtype": "Data",
+   "label": "Gun Type",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "make",
+   "fieldtype": "Data",
+   "label": "Make"
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Model"
+  },
+  {
+   "fieldname": "column_break_gun",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "calibre",
+   "fieldtype": "Data",
+   "label": "Calibre"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Photo",
+   "hidden": 1
+  },
+  {
+   "fieldname": "section_notes",
+   "fieldtype": "Section Break",
+   "label": "Gun Card Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "links": [],
+ "modified": "2026-11-03 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Workshop",
+ "name": "Gun",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "Workshop Counter",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Workshop Technician",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Workshop Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "field:gun_number",
+ "naming_rule": "By fieldname",
+ "image_field": "image",
+ "search_fields": "customer_name,mobile_no,gun_type",
+ "show_title_field_in_link": 0,
+ "title_field": "gun_number",
+ "track_changes": 1,
+ "quick_entry": 1
+}
