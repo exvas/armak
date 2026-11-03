@@ -1,6 +1,6 @@
 {
  "app": "armak",
- "creation": "2026-11-03 11:55:16.649851",
+ "creation": "2026-11-03 12:06:46.433703",
  "docstatus": 0,
  "doctype": "Dock",
  "idx": 0,
@@ -30,7 +30,7 @@
    "title": "Workshop Setup"
   }
  ],
- "modified": "2026-11-03 11:55:16.649851",
+ "modified": "2026-11-03 12:06:46.433703",
  "modified_by": "Administrator",
  "name": "armak",
  "owner": "Administrator",

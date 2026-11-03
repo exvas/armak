@@ -141,7 +141,8 @@ def meta(doctype, name):
 
 def dump(path, doc):
 	os.makedirs(os.path.dirname(path), exist_ok=True)
-	with open(path, "w") as f:
+	# developer CLI, not a web endpoint: paths come from the SPEC above, inside the repo
+	with open(path, "w") as f:  # nosemgrep: frappe-security-file-traversal
 		f.write(json.dumps(doc, indent=1, sort_keys=True) + "\n")
 	print("wrote", path)
 
