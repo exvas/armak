@@ -79,10 +79,47 @@ def after_migrate():
 
 
 def before_tests():
-	"""Run ERPNext's test setup (setup wizard, defaults); `run-tests --app armak` only calls our hook."""
-	from erpnext.setup.utils import before_tests as erpnext_before_tests
+	"""Complete the ERPNext setup wizard on a fresh test site; `run-tests --app armak` only calls our hook.
+
+	v15 ships `erpnext.setup.utils.before_tests`; v16 removed it, so the same steps are done here.
+	"""
+	try:
+		from erpnext.setup.utils import before_tests as erpnext_before_tests
+	except ImportError:
+		erpnext_before_tests = _erpnext_before_tests
 
 	erpnext_before_tests()
 	after_migrate()
 	# test setup must survive the per-test rollbacks of the test runner
 	frappe.db.commit()  # nosemgrep
+
+
+def _erpnext_before_tests():
+	from erpnext.setup.utils import _enable_all_roles_for_admin, set_defaults_for_tests
+	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+	from frappe.utils import now_datetime
+
+	frappe.clear_cache()
+	if not frappe.db.a_row_exists("Company"):
+		year = now_datetime().year
+		setup_complete(
+			{
+				"currency": "USD",
+				"full_name": "Test User",
+				"company_name": "Wind Power LLC",
+				"timezone": "America/New_York",
+				"company_abbr": "WP",
+				"industry": "Manufacturing",
+				"country": "United States",
+				"fy_start_date": f"{year}-01-01",
+				"fy_end_date": f"{year}-12-31",
+				"language": "english",
+				"company_tagline": "Testing",
+				"email": "test@erpnext.com",
+				"password": "test",
+				"chart_of_accounts": "Standard",
+			}
+		)
+	frappe.db.sql("delete from `tabItem Price`")
+	_enable_all_roles_for_admin()
+	set_defaults_for_tests()
