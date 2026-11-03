@@ -62,6 +62,14 @@ class RepairOrder(Document):
 				indicator="orange",
 				alert=True,
 			)
+		# fetch_from ran before validate, so a customer taken from the gun has no details yet
+		if self.customer and self.docstatus == 0:
+			details = frappe.db.get_value(
+				"Customer", self.customer, ["customer_name", "mobile_no", "armak_civil_id"], as_dict=True
+			)
+			self.customer_name = details.customer_name
+			self.mobile_no = details.mobile_no
+			self.civil_id = details.armak_civil_id
 
 	def set_defaults(self):
 		branch = get_branch_settings(self.branch) if self.branch else None

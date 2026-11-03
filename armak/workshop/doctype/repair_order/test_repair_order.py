@@ -111,6 +111,8 @@ class TestRepairOrder(FrappeTestCase):
 	def test_draft_fills_customer_rate_and_template_materials(self):
 		order = self.make_order(qty=4)
 		self.assertEqual(order.customer, self.customer)
+		self.assertEqual(order.customer_name, "_Test Gun Owner")
+		self.assertEqual(order.civil_id, "_T-12345")
 		self.assertEqual(order.status, "Draft")
 		self.assertEqual(flt(order.total), 80)
 		self.assertEqual(len(order.materials), 1)
@@ -177,3 +179,63 @@ class TestRepairOrder(FrappeTestCase):
 		tag = frappe.get_print("Repair Order", order.name, print_format="Repair Order Gun Tag", doc=order)
 		self.assertIn("data:image/png;base64,", tag)
 		self.assertIn(order.name, tag)
+
+	def test_dashboard_and_reports(self):
+		from frappe.utils import nowdate
+
+		from armak.workshop import dashboard
+		from armak.workshop.dashboard_chart_source.workshop_revenue_by_service import (
+			workshop_revenue_by_service as by_service,
+		)
+		from armak.workshop.report.repair_order_profit import repair_order_profit
+		from armak.workshop.report.workshop_material_consumption import workshop_material_consumption
+
+		late = self.make_order()
+		late.expected_delivery = add_days(now_datetime(), -1)
+		late.submit()
+		delivered = self.make_order()
+		delivered.submit()
+		delivered.receive_advance(5, "Cash")
+		delivered.mark_ready()
+		delivered.reload()
+		delivered.deliver("Cash", delivered.balance)
+
+		self.assertGreaterEqual(dashboard.late_orders()["value"], 1)
+		self.assertGreaterEqual(dashboard.open_orders()["value"], 1)
+		self.assertGreaterEqual(dashboard.todays_collections()["value"], flt(delivered.grand_total))
+
+		board = dashboard.get_board_data(BRANCH)
+		row = next(o for o in board["orders"] if o.name == late.name)
+		self.assertTrue(row.late)
+		self.assertEqual(row.services, [SERVICE])
+		self.assertNotIn(delivered.name, [o.name for o in board["orders"]])
+		self.assertGreaterEqual(board["kpis"]["delivered_today"], 1)
+
+		chart = by_service.get(filters={"branch": BRANCH, "period": "This Month"}, no_cache=1)
+		self.assertIn(SERVICE, chart["labels"])
+
+		filters = {"company": COMPANY, "branch": BRANCH, "from_date": nowdate(), "to_date": nowdate()}
+		_cols, rows, _msg, _chart, summary = repair_order_profit.execute(filters)
+		row = next(r for r in rows if r.name == delivered.name)
+		self.assertEqual(flt(row.profit), 19)
+		self.assertEqual(round(row.margin), 95)
+		self.assertTrue(summary)
+
+		_cols, rows, _msg, _chart = workshop_material_consumption.execute(filters)
+		paint = next(r for r in rows if r.item_code == PAINT)
+		self.assertGreaterEqual(flt(paint.qty), 0.25)
+		self.assertGreaterEqual(paint.orders, 1)
+
+		frappe.get_doc(
+			{
+				"doctype": "Item Reorder",
+				"parent": PAINT,
+				"parenttype": "Item",
+				"parentfield": "reorder_levels",
+				"warehouse": WAREHOUSE,
+				"warehouse_reorder_level": 1000,
+				"warehouse_reorder_qty": 10,
+				"material_request_type": "Purchase",
+			}
+		).db_insert()
+		self.assertIn(PAINT, [r.item_code for r in dashboard.get_low_stock()])

@@ -1,0 +1,288 @@
+{
+ "creation": "2026-11-03 12:00:00.000000",
+ "docstatus": 0,
+ "idx": 0,
+ "modified": "2026-11-03 12:00:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "module": "Workshop",
+ "doctype": "Workspace",
+ "label": "Workshop",
+ "title": "Workshop",
+ "icon": "tool",
+ "indicator_color": "orange",
+ "public": 1,
+ "is_hidden": 0,
+ "hide_custom": 0,
+ "for_user": "",
+ "parent_page": "",
+ "restrict_to_domain": "",
+ "sequence_id": 2.0,
+ "type": "Workspace",
+ "content": "[{\"id\": \"armakws001\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today in the Workshop</b></span>\", \"col\": 12}}, {\"id\": \"armakws002\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"In Workshop\", \"col\": 4}}, {\"id\": \"armakws003\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Late Orders\", \"col\": 4}}, {\"id\": \"armakws004\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Ready for Pickup\", \"col\": 4}}, {\"id\": \"armakws005\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Collected Today\", \"col\": 4}}, {\"id\": \"armakws006\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Balance to Collect\", \"col\": 4}}, {\"id\": \"armakws007\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Low Stock Materials\", \"col\": 4}}, {\"id\": \"armakws008\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"armakws009\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"armakws010\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Workshop Board\", \"col\": 3}}, {\"id\": \"armakws011\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Repair Order\", \"col\": 3}}, {\"id\": \"armakws012\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Repair Order\", \"col\": 3}}, {\"id\": \"armakws013\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Gun\", \"col\": 3}}, {\"id\": \"armakws014\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"armakws015\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workshop Monthly Revenue\", \"col\": 8}}, {\"id\": \"armakws016\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Repair Orders by Status\", \"col\": 4}}, {\"id\": \"armakws017\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workshop Revenue by Service\", \"col\": 6}}, {\"id\": \"armakws018\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Repair Orders per Month\", \"col\": 6}}, {\"id\": \"armakws019\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Repair Orders by Branch\", \"col\": 6}}, {\"id\": \"armakws020\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"armakws021\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\", \"col\": 12}}, {\"id\": \"armakws022\", \"type\": \"card\", \"data\": {\"card_name\": \"Workshop\", \"col\": 4}}, {\"id\": \"armakws023\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"armakws024\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}]",
+ "charts": [
+  {
+   "chart_name": "Repair Orders by Status",
+   "label": "Repair Orders by Status"
+  },
+  {
+   "chart_name": "Workshop Monthly Revenue",
+   "label": "Workshop Monthly Revenue"
+  },
+  {
+   "chart_name": "Repair Orders per Month",
+   "label": "Repair Orders per Month"
+  },
+  {
+   "chart_name": "Repair Orders by Branch",
+   "label": "Repair Orders by Branch"
+  },
+  {
+   "chart_name": "Workshop Revenue by Service",
+   "label": "Workshop Revenue by Service"
+  }
+ ],
+ "number_cards": [
+  {
+   "label": "In Workshop",
+   "number_card_name": "Workshop Open Orders"
+  },
+  {
+   "label": "Late Orders",
+   "number_card_name": "Workshop Late Orders"
+  },
+  {
+   "label": "Ready for Pickup",
+   "number_card_name": "Workshop Ready for Pickup"
+  },
+  {
+   "label": "Collected Today",
+   "number_card_name": "Workshop Collections Today"
+  },
+  {
+   "label": "Balance to Collect",
+   "number_card_name": "Workshop Balance to Collect"
+  },
+  {
+   "label": "Low Stock Materials",
+   "number_card_name": "Workshop Low Stock"
+  }
+ ],
+ "shortcuts": [
+  {
+   "color": "Orange",
+   "label": "Workshop Board",
+   "link_to": "workshop-board",
+   "type": "Page",
+   "doc_view": ""
+  },
+  {
+   "color": "Green",
+   "label": "New Repair Order",
+   "type": "URL",
+   "url": "/app/repair-order/new",
+   "doc_view": ""
+  },
+  {
+   "color": "Blue",
+   "label": "Repair Order",
+   "link_to": "Repair Order",
+   "type": "DocType",
+   "doc_view": "List",
+   "stats_filter": "{\"status\": [\"in\", [\"Received\", \"In Progress\", \"Ready for Delivery\"]]}"
+  },
+  {
+   "color": "Grey",
+   "label": "Gun",
+   "link_to": "Gun",
+   "type": "DocType",
+   "doc_view": "List"
+  }
+ ],
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Workshop",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Repair Order",
+   "link_count": 0,
+   "link_to": "Repair Order",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Gun",
+   "link_count": 0,
+   "link_to": "Gun",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer",
+   "link_count": 0,
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Workshop Board",
+   "link_count": 0,
+   "link_to": "workshop-board",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Repair Order Profit",
+   "link_count": 0,
+   "link_to": "Repair Order Profit",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Workshop Material Consumption",
+   "link_count": 0,
+   "link_to": "Workshop Material Consumption",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Accounts Receivable",
+   "link_count": 0,
+   "link_to": "Accounts Receivable",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Register",
+   "link_count": 0,
+   "link_to": "Sales Register",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Balance",
+   "link_count": 0,
+   "link_to": "Stock Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Setup",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Service Material Template",
+   "link_count": 0,
+   "link_to": "Service Material Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Workshop Settings",
+   "link_count": 0,
+   "link_to": "Workshop Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item",
+   "link_count": 0,
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item Price",
+   "link_count": 0,
+   "link_to": "Item Price",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  }
+ ],
+ "custom_blocks": [],
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Workshop Counter"
+  },
+  {
+   "role": "Workshop Technician"
+  },
+  {
+   "role": "Workshop Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "name": "Workshop"
+}
