@@ -88,10 +88,10 @@ class RepairOrder(Document):
 			)
 
 	def set_service_rates(self):
-		price_list = frappe.db.get_single_value("Selling Settings", "selling_price_list")
+		price_list = get_price_list(self.company)
 		for row in self.services:
 			if not row.rate and price_list:
-				row.rate = get_service_rate(row.service_item, price_list)
+				row.rate = get_service_rate(row.service_item, price_list=price_list)
 			row.amount = flt(row.qty) * flt(row.rate)
 
 	def calculate_totals(self):
@@ -264,6 +264,12 @@ class RepairOrder(Document):
 		si = frappe.new_doc("Sales Invoice")
 		si.company = self.company
 		si.customer = self.customer
+		# bill in the company currency at the order's agreed rates; left unset, ERPNext takes the
+		# currency of the default selling price list, which may be another currency
+		si.currency = frappe.get_cached_value("Company", self.company, "default_currency")
+		si.conversion_rate = 1
+		si.selling_price_list = get_price_list(self.company)
+		si.ignore_pricing_rule = 1
 		si.posting_date = nowdate()
 		si.set_posting_time = 1
 		si.due_date = nowdate()
@@ -283,6 +289,9 @@ class RepairOrder(Document):
 			)
 		self._tag(si)
 		si.set_missing_values()
+		for item, row in zip(si.items, self.services, strict=True):
+			item.price_list_rate = item.rate = row.rate
+			item.discount_percentage = item.discount_amount = 0
 		if self.taxes_and_charges:
 			si.taxes_and_charges = self.taxes_and_charges
 			si.set("taxes", get_taxes_and_charges("Sales Taxes and Charges Template", self.taxes_and_charges))
@@ -360,9 +369,23 @@ def make_advance_payment(order, amount, mode_of_payment):
 	return pe
 
 
+def get_price_list(company):
+	"""The selling price list in the company's currency: Selling Settings' default when it is in
+	that currency, otherwise the first enabled selling list that is. None when there is none."""
+	currency = frappe.get_cached_value("Company", company, "default_currency")
+	default = frappe.db.get_single_value("Selling Settings", "selling_price_list")
+	if default and frappe.db.get_value("Price List", default, "currency") == currency:
+		return default
+	return frappe.db.get_value(
+		"Price List", {"selling": 1, "enabled": 1, "currency": currency}, "name", order_by="creation"
+	)
+
+
 @frappe.whitelist()
-def get_service_rate(item_code: str, price_list: str | None = None):
-	price_list = price_list or frappe.db.get_single_value("Selling Settings", "selling_price_list")
+def get_service_rate(item_code: str, company: str | None = None, price_list: str | None = None):
+	price_list = price_list or (get_price_list(company) if company else None)
+	if not price_list:
+		return 0
 	return flt(
 		frappe.db.get_value(
 			"Item Price", {"item_code": item_code, "price_list": price_list}, "price_list_rate"
