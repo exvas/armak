@@ -13,7 +13,8 @@ from armak.setup_company_data import COMPANIES, _get, _get_list, _new, _save
 COMPANY = "Al Sayyad Arabian Trading and Contracting Est"
 ABBR = COMPANIES[COMPANY]["abbr"]
 
-# branch -> warehouses kept at that branch; the first "materials" one feeds Repair Orders
+# branch -> warehouses kept at that branch: "materials" feeds Repair Orders, "production" feeds
+# Production Entries, which put the finished products into "finished_goods"
 BRANCHES = {
 	"Center Market": {
 		"description": "Retail Shop - Center Market",
@@ -24,6 +25,8 @@ BRANCHES = {
 		"description": "Service & Retail - Awqad Industrial",
 		"warehouses": ["Awqad Showroom", "Awqad Workshop Materials", "Awqad Production Materials"],
 		"materials_warehouse": "Awqad Workshop Materials",
+		"production_warehouse": "Awqad Production Materials",
+		"finished_goods_warehouse": "Awqad Showroom",
 	},
 }
 DEFAULT_BRANCH = "Awqad Industrial"
@@ -84,11 +87,15 @@ def setup_accounting_dimension():
 
 def setup_workshop_settings(rows):
 	doc = _get("Workshop Settings", "Workshop Settings")
-	current = [
-		(r.get("branch"), r.get("materials_warehouse"), r.get("cost_center"))
-		for r in doc.get("branches") or []
-	]
-	wanted = [(r["branch"], r["materials_warehouse"], r["cost_center"]) for r in rows]
+	keys = (
+		"branch",
+		"materials_warehouse",
+		"production_warehouse",
+		"finished_goods_warehouse",
+		"cost_center",
+	)
+	current = [tuple(r.get(k) for k in keys) for r in doc.get("branches") or []]
+	wanted = [tuple(r[k] for k in keys) for r in rows]
 	changed = []
 	if current != wanted:
 		doc["branches"] = [{"doctype": "Workshop Branch", "company": COMPANY, **r} for r in rows]
@@ -116,6 +123,8 @@ def main():
 				{
 					"branch": branch,
 					"materials_warehouse": f"{data['materials_warehouse']} - {ABBR}",
+					"production_warehouse": f"{data['production_warehouse']} - {ABBR}",
+					"finished_goods_warehouse": f"{data['finished_goods_warehouse']} - {ABBR}",
 					"cost_center": cost_center,
 				}
 			)

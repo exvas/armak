@@ -39,10 +39,19 @@ SPEC = {
 				),
 				(
 					"section",
+					"Production",
+					"scissors",
+					[
+						("doctype", "Production Entry", "Production Entry"),
+						("doctype", "Material Templates (BOM)", "BOM"),
+					],
+				),
+				(
+					"section",
 					"Stock",
 					"package",
 					[
-						("doctype", "Material Issues", "Stock Entry"),
+						("doctype", "Stock Entries", "Stock Entry"),
 						("doctype", "Item", "Item"),
 						("doctype", "Material Request", "Material Request"),
 					],
@@ -56,6 +65,7 @@ SPEC = {
 			"items": [
 				("report", "Profit per Job", "Repair Order Profit", "chart-column"),
 				("report", "Material Consumption", "Workshop Material Consumption", "package"),
+				("report", "Production per Month", "Workshop Production", "scissors"),
 				(
 					"section",
 					"Sales & Collections",

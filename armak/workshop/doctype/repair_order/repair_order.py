@@ -10,6 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, flt, get_datetime, now_datetime, nowdate
 
+from armak.workshop.booking import book, cancel, system_booking
 from armak.workshop.doctype.workshop_settings.workshop_settings import get_branch_settings
 
 # status -> statuses it may move to by a button on the submitted order
@@ -44,8 +45,9 @@ class RepairOrder(Document):
 			frappe.throw(_("Cancel Sales Invoice {0} first").format(self.sales_invoice))
 
 	def on_cancel(self):
-		if self.stock_entry and frappe.db.get_value("Stock Entry", self.stock_entry, "docstatus") == 1:
-			frappe.get_doc("Stock Entry", self.stock_entry).cancel()
+		if self.stock_entry:
+			with system_booking():
+				cancel("Stock Entry", self.stock_entry)
 		self.db_set("status", "Cancelled")
 
 	# ------------------------------------------------------------ validate helpers
@@ -170,7 +172,8 @@ class RepairOrder(Document):
 		self.check_permission("write")
 		self._move_to("Ready for Delivery")
 		if self.materials and not self.stock_entry:
-			stock_entry = self.make_material_issue()
+			with system_booking() as user:
+				stock_entry = self.make_material_issue(user)
 			self.stock_entry = stock_entry.name
 			self.material_cost = stock_entry.total_outgoing_value
 		self.status = "Ready for Delivery"
@@ -186,7 +189,8 @@ class RepairOrder(Document):
 		amount = flt(amount)
 		if amount <= 0:
 			frappe.throw(_("Advance amount must be more than zero"))
-		payment = make_advance_payment(self, amount, mode_of_payment)
+		with system_booking() as user:
+			payment = make_advance_payment(self, amount, mode_of_payment, user)
 		self.update_advance()
 		return payment.name
 
@@ -195,22 +199,13 @@ class RepairOrder(Document):
 		"""Hand the gun back: invoice the services (advances allocated) and take the balance."""
 		self.check_permission("write")
 		self._move_to("Delivered")
-		invoice = self.make_sales_invoice()
 		amount_paid = flt(amount_paid)
-		if amount_paid > 0:
-			if not mode_of_payment:
-				frappe.throw(_("Select the mode of payment for the balance"))
-			pe = get_payment_entry("Sales Invoice", invoice.name)
-			pe.mode_of_payment = mode_of_payment
-			pe.paid_to = get_bank_cash_account(mode_of_payment, self.company)["account"]
-			pe.paid_amount = pe.received_amount = min(amount_paid, flt(invoice.outstanding_amount))
-			pe.references[0].allocated_amount = pe.paid_amount
-			pe.reference_no = pe.reference_no or invoice.name
-			pe.reference_date = pe.reference_date or nowdate()
-			self._tag(pe)
-			pe.armak_payment_stage = "Balance"
-			pe.insert()
-			pe.submit()
+		if amount_paid > 0 and not mode_of_payment:
+			frappe.throw(_("Select the mode of payment for the balance"))
+		with system_booking() as user:
+			invoice = self.make_sales_invoice(user)
+			if amount_paid > 0:
+				self.make_balance_payment(invoice, mode_of_payment, amount_paid, user)
 		self.sales_invoice = invoice.name
 		self.delivered_on = now_datetime()
 		self.profit = flt(invoice.base_net_total) - flt(self.material_cost)
@@ -222,7 +217,10 @@ class RepairOrder(Document):
 	# ------------------------------------------------------------ documents
 
 	def _tag(self, doc):
-		"""Link a generated document back to this order and its branch / cost center."""
+		"""Link a generated document back to this order and its branch / cost center.
+
+		Generated documents are booked inside system_booking(): the user's right is checked on the
+		order (check_permission in each action), so workshop roles need no rights on the ledgers."""
 		doc.armak_repair_order = self.name
 		if doc.meta.has_field("branch"):
 			doc.branch = self.branch
@@ -231,7 +229,7 @@ class RepairOrder(Document):
 			doc.cost_center = branch.cost_center
 		return branch
 
-	def make_material_issue(self):
+	def make_material_issue(self, user):
 		branch = get_branch_settings(self.branch)
 		if not branch:
 			frappe.throw(
@@ -255,11 +253,21 @@ class RepairOrder(Document):
 				},
 			)
 		self._tag(se)
-		se.insert()
-		se.submit()
-		return se
+		return book(se, user)
 
-	def make_sales_invoice(self):
+	def make_balance_payment(self, invoice, mode_of_payment, amount, user):
+		pe = get_payment_entry("Sales Invoice", invoice.name)
+		pe.mode_of_payment = mode_of_payment
+		pe.paid_to = get_bank_cash_account(mode_of_payment, self.company)["account"]
+		pe.paid_amount = pe.received_amount = min(amount, flt(invoice.outstanding_amount))
+		pe.references[0].allocated_amount = pe.paid_amount
+		pe.reference_no = pe.reference_no or invoice.name
+		pe.reference_date = pe.reference_date or nowdate()
+		self._tag(pe)
+		pe.armak_payment_stage = "Balance"
+		return book(pe, user)
+
+	def make_sales_invoice(self, user):
 		branch = get_branch_settings(self.branch)
 		si = frappe.new_doc("Sales Invoice")
 		si.company = self.company
@@ -314,9 +322,7 @@ class RepairOrder(Document):
 			adv.allocated_amount = min(flt(adv.allocated_amount), remaining)
 			remaining -= adv.allocated_amount
 		si.set("advances", [adv for adv in si.advances if adv.allocated_amount > 0])
-		si.insert()
-		si.submit()
-		return si
+		return book(si, user)
 
 	def update_advance(self):
 		advance = sum(flt(pe.paid_amount) for pe in get_advance_payments(self.name, unallocated_only=False))
@@ -344,7 +350,7 @@ def get_advance_payments(repair_order, unallocated_only=True):
 	)
 
 
-def make_advance_payment(order, amount, mode_of_payment):
+def make_advance_payment(order, amount, mode_of_payment, user):
 	account = get_bank_cash_account(mode_of_payment, order.company)["account"]
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = "Receive"
@@ -364,9 +370,7 @@ def make_advance_payment(order, amount, mode_of_payment):
 	pe.armak_payment_stage = "Advance"
 	pe.setup_party_account_field()
 	pe.set_missing_values()
-	pe.insert()
-	pe.submit()
-	return pe
+	return book(pe, user)
 
 
 def get_price_list(company):

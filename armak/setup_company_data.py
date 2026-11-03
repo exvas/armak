@@ -99,6 +99,7 @@ SERIES = {
 	"Stock Entry": ["STE-{abbr}-.YY.-"],
 	"Material Request": ["MR-{abbr}-.YY.-"],
 	"Repair Order": ["RO-{abbr}-.YY.-"],
+	"Production Entry": ["PRD-{abbr}-.YY.-"],
 }
 
 
