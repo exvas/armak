@@ -1,4 +1,4 @@
-"""Workshop setup that ships with the app: roles, custom fields and search settings.
+"""Workshop setup that ships with the app: roles, their rights, custom fields and search settings.
 
 Runs on install and on every migrate, so it must stay idempotent.
 """
@@ -6,8 +6,53 @@ Runs on install and on every migrate, so it must stay idempotent.
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.permissions import add_permission, update_permission_property
 
-ROLES = ["Workshop Counter", "Workshop Technician", "Workshop Manager"]
+ROLES = ["Workshop Counter", "Workshop Technician", "Workshop Manager", "Workshop Tailor"]
+
+# rights on ERPNext doctypes each role needs for its own screens: picking items and customers,
+# printing the invoice, seeing what a Repair Order or Production Entry booked. The ledgers a
+# Repair Order or Production Entry books itself need none (they are booked by the system).
+# r read, w write, c create, p print
+_LOOKUPS = {
+	"Item": "r",
+	"UOM": "r",
+	"Branch": "r",
+	"Company": "r",
+	"Warehouse": "r",
+	"Bin": "r",
+	"Stock Entry": "rp",
+}
+ROLE_RIGHTS = {
+	"Workshop Counter": {
+		**_LOOKUPS,
+		"Customer": "rwc",
+		"Contact": "rwc",
+		"Address": "rwc",
+		"Item Price": "r",
+		"Price List": "r",
+		"Mode of Payment": "r",
+		"Sales Taxes and Charges Template": "r",
+		"Sales Invoice": "rp",
+		"Payment Entry": "rp",
+	},
+	"Workshop Technician": {**_LOOKUPS, "Customer": "r"},
+	"Workshop Manager": {
+		**_LOOKUPS,
+		"Customer": "rwc",
+		"Contact": "rwc",
+		"Address": "rwc",
+		"Item Price": "rwc",
+		"Price List": "r",
+		"Mode of Payment": "r",
+		"Sales Taxes and Charges Template": "r",
+		"Sales Invoice": "rp",
+		"Payment Entry": "rp",
+		"BOM": "r",
+	},
+	"Workshop Tailor": {**_LOOKUPS, "BOM": "r"},
+}
+_PTYPES = {"r": "read", "w": "write", "c": "create", "p": "print"}
 
 _REPAIR_ORDER_LINK = {
 	"fieldname": "armak_repair_order",
@@ -38,7 +83,19 @@ CUSTOM_FIELDS = {
 		},
 	],
 	"Sales Invoice": [{**_REPAIR_ORDER_LINK, "insert_after": "customer_name"}],
-	"Stock Entry": [{**_REPAIR_ORDER_LINK, "insert_after": "stock_entry_type"}],
+	"Stock Entry": [
+		{**_REPAIR_ORDER_LINK, "insert_after": "stock_entry_type"},
+		{
+			"fieldname": "armak_production_entry",
+			"label": "Production Entry",
+			"fieldtype": "Link",
+			"options": "Production Entry",
+			"read_only": 1,
+			"no_copy": 1,
+			"search_index": 1,
+			"insert_after": "armak_repair_order",
+		},
+	],
 	"Payment Entry": [
 		{**_REPAIR_ORDER_LINK, "insert_after": "party_name"},
 		{
@@ -66,6 +123,7 @@ def after_migrate():
 				ignore_permissions=True
 			)
 	create_custom_fields(CUSTOM_FIELDS, update=True)
+	grant_role_rights()
 	# counter staff find returning customers by mobile or Civil ID
 	make_property_setter(
 		"Customer",
@@ -76,6 +134,21 @@ def after_migrate():
 		for_doctype=True,
 		validate_fields_for_doctype=False,
 	)
+
+
+def grant_role_rights():
+	"""Add the rights in ROLE_RIGHTS; never removes any, so a site can widen them."""
+	for role, doctypes in ROLE_RIGHTS.items():
+		for doctype, rights in doctypes.items():
+			if not frappe.db.exists("DocType", doctype):
+				continue
+			if not frappe.db.exists(
+				"Custom DocPerm", {"parent": doctype, "role": role, "permlevel": 0, "if_owner": 0}
+			):
+				add_permission(doctype, role)
+			for right in rights:
+				update_permission_property(doctype, role, 0, _PTYPES[right], 1, validate=False)
+	frappe.clear_cache()
 
 
 def before_tests():

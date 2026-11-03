@@ -11,6 +11,52 @@ BRANCH = "_Test Workshop Branch"
 WAREHOUSE = "Stores - WP"
 SERVICE = "_Test Black Painting"
 PAINT = "_Test Black Paint"
+FINISHED = "Finished Goods - WP"
+COVER = "_Test Rifle Cover"
+FABRIC = "_Test Cover Fabric"
+ZIPPER = "_Test Cover Zipper"
+COUNTER_USER = "_test_workshop_counter@example.com"
+TAILOR_USER = "_test_workshop_tailor@example.com"
+
+
+def make_user(email, role):
+	if not frappe.db.exists("User", email):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": email,
+				"first_name": role,
+				"send_welcome_email": 0,
+				"roles": [{"role": role}],
+			}
+		).insert(ignore_permissions=True)
+	return email
+
+
+def make_cover_bom():
+	"""One 60 m fabric roll and 10 zippers make 10 covers (the client's example)."""
+	for item_code, is_stock_item in ((COVER, 1), (FABRIC, 1), (ZIPPER, 1)):
+		make_item(item_code, is_stock_item)
+	bom = frappe.db.get_value("BOM", {"item": COVER, "is_default": 1, "docstatus": 1})
+	if not bom:
+		doc = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": COVER,
+				"company": COMPANY,
+				"quantity": 10,
+				"rm_cost_as_per": "Valuation Rate",
+				"items": [
+					{"item_code": FABRIC, "qty": 60, "rate": 2},
+					{"item_code": ZIPPER, "qty": 10, "rate": 0.5},
+				],
+			}
+		).insert()
+		doc.submit()
+		bom = doc.name
+	make_stock_entry(item_code=FABRIC, target=WAREHOUSE, qty=100, basic_rate=2, company=COMPANY)
+	make_stock_entry(item_code=ZIPPER, target=WAREHOUSE, qty=50, basic_rate=0.5, company=COMPANY)
+	return bom
 
 
 def selling_price_list():
@@ -74,6 +120,8 @@ class TestRepairOrder(FrappeTestCase):
 					"branch": BRANCH,
 					"company": COMPANY,
 					"materials_warehouse": WAREHOUSE,
+					"production_warehouse": WAREHOUSE,
+					"finished_goods_warehouse": FINISHED,
 					"cost_center": "Main - WP",
 				}
 			],
@@ -263,3 +311,103 @@ class TestRepairOrder(FrappeTestCase):
 			}
 		).db_insert()
 		self.assertIn(PAINT, [r.item_code for r in dashboard.get_low_stock()])
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+
+	def test_production_entry_as_tailor(self):
+		bom = make_cover_bom()
+		frappe.set_user(make_user(TAILOR_USER, "Workshop Tailor"))
+		entry = frappe.get_doc(
+			{
+				"doctype": "Production Entry",
+				"company": COMPANY,
+				"branch": BRANCH,
+				"item_code": COVER,
+				"qty": 6,
+			}
+		)
+		entry.insert()
+		self.assertEqual(entry.bom, bom)
+		self.assertEqual(entry.source_warehouse, WAREHOUSE)
+		self.assertEqual(entry.target_warehouse, FINISHED)
+		materials = {row.item_code: row for row in entry.materials}
+		self.assertEqual(flt(materials[FABRIC].qty), 36)  # 60 m per 10 covers, 6 made
+		self.assertEqual(flt(materials[ZIPPER].qty), 6)
+
+		materials[FABRIC].qty = 38  # the tailor used a little more than the template
+		entry.save()
+		entry.submit()
+
+		frappe.set_user("Administrator")
+		entry.reload()
+		se = frappe.get_doc("Stock Entry", entry.stock_entry)
+		self.assertEqual(
+			(se.purpose, se.docstatus, se.armak_production_entry), ("Manufacture", 1, entry.name)
+		)
+		self.assertEqual(se.owner, TAILOR_USER)
+		finished = [d for d in se.items if d.is_finished_item]
+		self.assertEqual([(d.item_code, flt(d.qty), d.t_warehouse) for d in finished], [(COVER, 6, FINISHED)])
+		used = {d.item_code: flt(d.qty) for d in se.items if not d.is_finished_item}
+		self.assertEqual(used, {FABRIC: 38, ZIPPER: 6})
+		self.assertEqual(flt(entry.material_cost), 79)  # 38 x 2 + 6 x 0.5
+		self.assertAlmostEqual(flt(entry.unit_cost), 79 / 6, places=3)
+
+		from armak.workshop.report.workshop_production import workshop_production
+
+		_cols, rows, _msg, _chart = workshop_production.execute(
+			{
+				"company": COMPANY,
+				"item_code": COVER,
+				"from_date": entry.posting_date,
+				"to_date": entry.posting_date,
+			}
+		)
+		self.assertGreaterEqual(sum(r.qty for r in rows), 6)
+
+		entry.cancel()
+		self.assertEqual(frappe.db.get_value("Stock Entry", entry.stock_entry, "docstatus"), 2)
+
+	def test_counter_staff_full_flow(self):
+		"""Counter staff hold only the Workshop Counter role, not Administrator's."""
+		from armak.workshop import dashboard
+
+		frappe.set_user(make_user(COUNTER_USER, "Workshop Counter"))
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Walk-in Hunter",
+				"customer_group": "Individual",
+				"territory": "All Territories",
+				"mobile_no": "96812345678",
+			}
+		).insert()
+		gun = frappe.get_doc(
+			{"doctype": "Gun", "gun_number": "_T-GUN-COUNTER", "customer": customer.name}
+		).insert()
+		order = frappe.get_doc(
+			{
+				"doctype": "Repair Order",
+				"company": COMPANY,
+				"branch": BRANCH,
+				"gun": gun.name,
+				"expected_delivery": add_days(now_datetime(), 1),
+				"services": [{"service_item": SERVICE, "qty": 1}],
+			}
+		).insert()
+		order.submit()
+		order.receive_advance(5, "Cash")
+		order.reload()
+		order.start_work()
+		order.mark_ready()
+		order.reload()
+		order.deliver("Cash", order.balance)
+		order.reload()
+		self.assertEqual(order.status, "Delivered")
+		self.assertEqual(frappe.db.get_value("Sales Invoice", order.sales_invoice, "outstanding_amount"), 0)
+		self.assertTrue(frappe.has_permission("Sales Invoice", "print", order.sales_invoice))
+		# booked by the system, but the audit trail names the counter user
+		self.assertEqual(frappe.db.get_value("Sales Invoice", order.sales_invoice, "owner"), COUNTER_USER)
+		self.assertEqual(frappe.db.get_value("Stock Entry", order.stock_entry, "owner"), COUNTER_USER)
+		self.assertGreaterEqual(dashboard.todays_collections()["value"], flt(order.grand_total))
+		self.assertTrue(dashboard.get_board_data(BRANCH)["kpis"])

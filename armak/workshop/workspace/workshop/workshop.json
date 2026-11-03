@@ -1,8 +1,8 @@
 {
- "creation": "2026-11-03 12:00:00.000000",
+ "creation": "2026-11-03 14:00:00.000000",
  "docstatus": 0,
  "idx": 0,
- "modified": "2026-11-03 12:00:00.000000",
+ "modified": "2026-11-03 14:00:00.000000",
  "modified_by": "Administrator",
  "owner": "Administrator",
  "module": "Workshop",
@@ -19,7 +19,7 @@
  "restrict_to_domain": "",
  "sequence_id": 2.0,
  "type": "Workspace",
- "content": "[{\"id\": \"armakws001\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today in the Workshop</b></span>\", \"col\": 12}}, {\"id\": \"armakws002\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"In Workshop\", \"col\": 4}}, {\"id\": \"armakws003\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Late Orders\", \"col\": 4}}, {\"id\": \"armakws004\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Ready for Pickup\", \"col\": 4}}, {\"id\": \"armakws005\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Collected Today\", \"col\": 4}}, {\"id\": \"armakws006\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Balance to Collect\", \"col\": 4}}, {\"id\": \"armakws007\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Low Stock Materials\", \"col\": 4}}, {\"id\": \"armakws008\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"armakws009\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"armakws010\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Workshop Board\", \"col\": 3}}, {\"id\": \"armakws011\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Repair Order\", \"col\": 3}}, {\"id\": \"armakws012\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Repair Order\", \"col\": 3}}, {\"id\": \"armakws013\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Gun\", \"col\": 3}}, {\"id\": \"armakws014\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"armakws015\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workshop Monthly Revenue\", \"col\": 8}}, {\"id\": \"armakws016\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Repair Orders by Status\", \"col\": 4}}, {\"id\": \"armakws017\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workshop Revenue by Service\", \"col\": 6}}, {\"id\": \"armakws018\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Repair Orders per Month\", \"col\": 6}}, {\"id\": \"armakws019\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Repair Orders by Branch\", \"col\": 6}}, {\"id\": \"armakws020\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"armakws021\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\", \"col\": 12}}, {\"id\": \"armakws022\", \"type\": \"card\", \"data\": {\"card_name\": \"Workshop\", \"col\": 4}}, {\"id\": \"armakws023\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"armakws024\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}]",
+ "content": "[{\"id\": \"armakws001\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today in the Workshop</b></span>\", \"col\": 12}}, {\"id\": \"armakws002\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"In Workshop\", \"col\": 4}}, {\"id\": \"armakws003\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Late Orders\", \"col\": 4}}, {\"id\": \"armakws004\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Ready for Pickup\", \"col\": 4}}, {\"id\": \"armakws005\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Collected Today\", \"col\": 4}}, {\"id\": \"armakws006\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Balance to Collect\", \"col\": 4}}, {\"id\": \"armakws007\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Low Stock Materials\", \"col\": 4}}, {\"id\": \"armakws008\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"armakws009\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"armakws010\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Workshop Board\", \"col\": 3}}, {\"id\": \"armakws011\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Repair Order\", \"col\": 3}}, {\"id\": \"armakws012\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Repair Order\", \"col\": 3}}, {\"id\": \"armakws013\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Gun\", \"col\": 3}}, {\"id\": \"armakws014\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"armakws015\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workshop Monthly Revenue\", \"col\": 8}}, {\"id\": \"armakws016\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Repair Orders by Status\", \"col\": 4}}, {\"id\": \"armakws017\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workshop Revenue by Service\", \"col\": 6}}, {\"id\": \"armakws018\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Repair Orders per Month\", \"col\": 6}}, {\"id\": \"armakws019\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Repair Orders by Branch\", \"col\": 6}}, {\"id\": \"armakws020\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Products Made per Month\", \"col\": 6}}, {\"id\": \"armakws021\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"armakws022\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\", \"col\": 12}}, {\"id\": \"armakws023\", \"type\": \"card\", \"data\": {\"card_name\": \"Workshop\", \"col\": 4}}, {\"id\": \"armakws024\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"armakws025\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}]",
  "charts": [
   {
    "chart_name": "Repair Orders by Status",
@@ -40,6 +40,10 @@
   {
    "chart_name": "Workshop Revenue by Service",
    "label": "Workshop Revenue by Service"
+  },
+  {
+   "chart_name": "Products Made per Month",
+   "label": "Products Made per Month"
   }
  ],
  "number_cards": [
@@ -104,7 +108,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Workshop",
-   "link_count": 4,
+   "link_count": 6,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -155,8 +159,30 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Production Entry",
+   "link_count": 0,
+   "link_to": "Production Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Bill of Materials",
+   "link_count": 0,
+   "link_to": "BOM",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Reports",
-   "link_count": 5,
+   "link_count": 6,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -177,6 +203,17 @@
    "label": "Workshop Material Consumption",
    "link_count": 0,
    "link_to": "Workshop Material Consumption",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "dependencies": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Workshop Production",
+   "link_count": 0,
+   "link_to": "Workshop Production",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link",
@@ -279,6 +316,9 @@
   },
   {
    "role": "Workshop Manager"
+  },
+  {
+   "role": "Workshop Tailor"
   },
   {
    "role": "System Manager"

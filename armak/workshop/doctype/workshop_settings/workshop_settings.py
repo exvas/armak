@@ -13,13 +13,20 @@ class WorkshopSettings(Document):
 			if row.branch in seen:
 				frappe.throw(_("Row {0}: branch {1} is listed twice").format(row.idx, row.branch))
 			seen.add(row.branch)
-			wh_company = frappe.db.get_value("Warehouse", row.materials_warehouse, "company")
-			if wh_company != row.company:
-				frappe.throw(
-					_("Row {0}: warehouse {1} belongs to {2}, not {3}").format(
-						row.idx, row.materials_warehouse, wh_company, row.company
+			for warehouse in (
+				row.materials_warehouse,
+				row.production_warehouse,
+				row.finished_goods_warehouse,
+			):
+				if not warehouse:
+					continue
+				wh_company = frappe.db.get_value("Warehouse", warehouse, "company")
+				if wh_company != row.company:
+					frappe.throw(
+						_("Row {0}: warehouse {1} belongs to {2}, not {3}").format(
+							row.idx, warehouse, wh_company, row.company
+						)
 					)
-				)
 
 
 def get_branch_settings(branch):
