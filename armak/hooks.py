@@ -11,15 +11,15 @@ app_license = "mit"
 required_apps = ["erpnext"]
 
 # Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "armak",
-# 		"logo": "/assets/armak/logo.png",
-# 		"title": "Armak",
-# 		"route": "/armak",
-# 		"has_permission": "armak.api.permission.has_app_permission"
-# 	}
-# ]
+add_to_apps_screen = [
+	{
+		"name": app_name,
+		"logo": "/assets/armak/images/armak-logo.svg",
+		"title": app_title,
+		# Frappe 16 desk: first rail sidebar (scripts/gen_desk.py)
+		"route": "/desk/workshop",
+	}
+]
 
 # Includes in <head>
 # ------------------
