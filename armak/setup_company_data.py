@@ -98,6 +98,7 @@ SERIES = {
 	"Purchase Receipt": ["PREC-{abbr}-.YY.-", "PREC-RET-{abbr}-.YY.-"],
 	"Stock Entry": ["STE-{abbr}-.YY.-"],
 	"Material Request": ["MR-{abbr}-.YY.-"],
+	"Repair Order": ["RO-{abbr}-.YY.-"],
 }
 
 

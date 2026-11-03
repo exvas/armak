@@ -1,0 +1,21 @@
+{
+ "creation": "2026-11-03 12:00:00.000000",
+ "docstatus": 0,
+ "idx": 0,
+ "modified": "2026-11-03 12:00:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "module": "Workshop",
+ "doctype": "Number Card",
+ "label": "Low Stock Materials",
+ "type": "Custom",
+ "method": "armak.workshop.dashboard.low_stock_items",
+ "color": "Red",
+ "is_public": 1,
+ "is_standard": 1,
+ "show_percentage_stats": 0,
+ "filters_json": "[]",
+ "dynamic_filters_json": "[]",
+ "function": "Count",
+ "name": "Workshop Low Stock"
+}

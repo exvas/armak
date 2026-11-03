@@ -22,4 +22,7 @@ jobs:
       draft_frappe_versions: '["version-15"]'
       hrms: true
       runs_on: '"ubuntu-latest"'
-      require_tests: false  # no Frappe tests in the app yet; the check proves it installs
+      require_tests: true
+      # the tests build their own data on the setup-wizard company; ERPNext's test-record tree
+      # needs apps this bench does not install (Payment Gateway)
+      run_tests_args: "--skip-test-records"

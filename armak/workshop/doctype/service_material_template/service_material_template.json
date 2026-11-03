@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "creation": "2026-11-03 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "service_item",
+  "service_name",
+  "disabled",
+  "section_items",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_item",
+   "fieldtype": "Link",
+   "label": "Service",
+   "options": "Item",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1,
+   "description": "The service item sold on the Repair Order (e.g. Black Painting)."
+  },
+  {
+   "fieldname": "service_name",
+   "fieldtype": "Data",
+   "label": "Service Name",
+   "fetch_from": "service_item.item_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled",
+   "default": "0"
+  },
+  {
+   "fieldname": "section_items",
+   "fieldtype": "Section Break",
+   "label": "Materials Used per Gun"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Materials",
+   "options": "Service Material Template Item",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-11-03 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Workshop",
+ "name": "Service Material Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "Workshop Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Workshop Technician",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Workshop Counter",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "field:service_item",
+ "naming_rule": "By fieldname",
+ "track_changes": 1
+}
