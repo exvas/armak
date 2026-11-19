@@ -8,6 +8,7 @@
   "services_item_group",
   "column_break_defaults",
   "default_delivery_days",
+  "prices_include_vat",
   "section_branches",
   "branches"
  ],
@@ -36,6 +37,13 @@
    "default": "3"
   },
   {
+   "fieldname": "prices_include_vat",
+   "fieldtype": "Check",
+   "label": "Prices Include VAT",
+   "default": "1",
+   "description": "Service prices are the full price to the customer, VAT included (the client's choice). Untick if VAT is added on top."
+  },
+  {
    "fieldname": "section_branches",
    "fieldtype": "Section Break",
    "label": "Branches"
@@ -48,7 +56,7 @@
   }
  ],
  "links": [],
- "modified": "2026-11-03 15:00:00.000000",
+ "modified": "2026-11-19 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Workshop",
  "name": "Workshop Settings",

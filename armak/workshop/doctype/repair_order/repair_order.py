@@ -1,6 +1,8 @@
 # Copyright (c) 2026, sammish and contributors
 # For license information, please see license.txt
 
+from urllib.parse import quote
+
 import frappe
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
@@ -8,10 +10,11 @@ from erpnext.accounts.party import get_party_account
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, flt, get_datetime, now_datetime, nowdate
+from frappe.utils import add_days, flt, fmt_money, get_datetime, now_datetime, nowdate
 
 from armak.workshop.booking import book, cancel, system_booking
 from armak.workshop.doctype.workshop_settings.workshop_settings import get_branch_settings
+from armak.workshop.registration import mobile_digits
 
 # status -> statuses it may move to by a button on the submitted order
 NEXT_STATUS = {
@@ -72,11 +75,20 @@ class RepairOrder(Document):
 			self.customer_name = details.customer_name
 			self.mobile_no = details.mobile_no
 			self.civil_id = details.armak_civil_id
+			if not self.mobile_no:
+				frappe.throw(
+					_(
+						"Customer {0} has no mobile number. The mobile number is the workshop's Customer ID."
+					).format(self.customer_name),
+					title=_("Mobile Number Required"),
+				)
 
 	def set_defaults(self):
 		branch = get_branch_settings(self.branch) if self.branch else None
 		if branch and self.company != branch.company:
 			frappe.throw(_("Branch {0} belongs to {1}").format(self.branch, branch.company))
+		if self.is_new():
+			self.prices_include_vat = frappe.db.get_single_value("Workshop Settings", "prices_include_vat")
 		if not self.expected_delivery:
 			days = frappe.db.get_single_value("Workshop Settings", "default_delivery_days") or 0
 			self.expected_delivery = get_datetime(add_days(self.posting_date or nowdate(), days))
@@ -97,24 +109,32 @@ class RepairOrder(Document):
 			row.amount = flt(row.qty) * flt(row.rate)
 
 	def calculate_totals(self):
-		self.total = sum(flt(row.amount) for row in self.services)
-		rate = 0
-		if self.taxes_and_charges:
-			rate = sum(
-				flt(tax.rate)
-				for tax in frappe.get_all(
-					"Sales Taxes and Charges",
-					filters={
-						"parent": self.taxes_and_charges,
-						"parenttype": "Sales Taxes and Charges Template",
-					},
-					fields=["rate", "charge_type"],
-				)
-				if tax.charge_type == "On Net Total"
-			)
-		self.tax_amount = flt(self.total * rate / 100, self.precision("tax_amount"))
-		self.grand_total = flt(self.total + self.tax_amount, self.precision("grand_total"))
+		amount = sum(flt(row.amount) for row in self.services)
+		rate = self.vat_rate()
+		if self.prices_include_vat:
+			# the prices are what the customer pays; the VAT inside them is worked back out
+			self.grand_total = flt(amount, self.precision("grand_total"))
+			self.tax_amount = flt(amount * rate / (100 + rate), self.precision("tax_amount"))
+			self.total = flt(self.grand_total - self.tax_amount, self.precision("total"))
+		else:
+			self.total = flt(amount, self.precision("total"))
+			self.tax_amount = flt(amount * rate / 100, self.precision("tax_amount"))
+			self.grand_total = flt(self.total + self.tax_amount, self.precision("grand_total"))
 		self.balance = flt(self.grand_total - flt(self.advance_paid), self.precision("balance"))
+
+	def vat_rate(self):
+		"""The percentage the order's tax template charges on the net total."""
+		if not self.taxes_and_charges:
+			return 0
+		return sum(
+			flt(tax.rate)
+			for tax in frappe.get_all(
+				"Sales Taxes and Charges",
+				filters={"parent": self.taxes_and_charges, "parenttype": "Sales Taxes and Charges Template"},
+				fields=["rate", "charge_type"],
+			)
+			if tax.charge_type == "On Net Total"
+		)
 
 	def set_template_materials(self):
 		"""Add the template materials of every service that has none on the order yet."""
@@ -214,6 +234,33 @@ class RepairOrder(Document):
 		self.update_advance()
 		return invoice.name
 
+	@frappe.whitelist()
+	def notify_customer(self, channel: str):
+		"""Record that the customer was told the gun is ready; returns the link to open."""
+		self.check_permission("write")
+		if channel not in ("WhatsApp", "Phone"):
+			frappe.throw(_("Unknown channel {0}").format(channel))
+		if self.status != "Ready for Delivery":
+			frappe.throw(_("Notify the customer once the gun is Ready for Delivery"))
+		self.db_set({"customer_notified_on": now_datetime(), "notified_via": channel})
+		self.add_comment("Info", _("Customer notified by {0}").format(channel))
+		return self.whatsapp_link() if channel == "WhatsApp" else "tel:+" + mobile_digits(self.mobile_no)
+
+	def whatsapp_link(self):
+		return f"https://wa.me/{mobile_digits(self.mobile_no)}?text={quote(self.ready_message())}"
+
+	def ready_message(self):
+		company = frappe.db.get_value("Company", self.company, "company_name")
+		balance = fmt_money(self.balance, currency=self.currency) if flt(self.balance) > 0 else None
+		english = _("Dear {0}, your gun {1} (order {2}) is ready for collection.").format(
+			self.customer_name, self.gun, self.name
+		)
+		arabic = f"عزيزنا {self.customer_name}، سلاحكم رقم {self.gun} (طلب {self.name}) جاهز للاستلام."
+		if balance:
+			english += " " + _("Balance due: {0}.").format(balance)
+			arabic += f" المبلغ المتبقي: {balance}."
+		return f"{arabic}\n{english}\n{company}"
+
 	# ------------------------------------------------------------ documents
 
 	def _tag(self, doc):
@@ -303,6 +350,10 @@ class RepairOrder(Document):
 		if self.taxes_and_charges:
 			si.taxes_and_charges = self.taxes_and_charges
 			si.set("taxes", get_taxes_and_charges("Sales Taxes and Charges Template", self.taxes_and_charges))
+			if self.prices_include_vat:
+				for tax in si.taxes:
+					if tax.charge_type == "On Net Total":
+						tax.included_in_print_rate = 1
 		for pe in get_advance_payments(self.name):
 			si.append(
 				"advances",
