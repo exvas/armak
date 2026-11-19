@@ -1,6 +1,8 @@
 # Copyright (c) 2026, sammish and contributors
 # For license information, please see license.txt
 
+from urllib.parse import quote
+
 import frappe
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from frappe.tests.utils import FrappeTestCase
@@ -16,6 +18,7 @@ COVER = "_Test Rifle Cover"
 FABRIC = "_Test Cover Fabric"
 ZIPPER = "_Test Cover Zipper"
 COUNTER_USER = "_test_workshop_counter@example.com"
+OWNER_MOBILE = "+968 9100 0001"
 TAILOR_USER = "_test_workshop_tailor@example.com"
 
 
@@ -127,6 +130,7 @@ class TestRepairOrder(FrappeTestCase):
 			],
 		)
 		settings.default_branch = BRANCH
+		settings.prices_include_vat = 1  # the client's answer: VAT is inside the price
 		settings.save()
 
 		cash = frappe.get_doc("Mode of Payment", "Cash")
@@ -152,11 +156,13 @@ class TestRepairOrder(FrappeTestCase):
 					"doctype": "Customer",
 					"customer_name": "_Test Gun Owner",
 					"armak_civil_id": "_T-12345",
+					"mobile_no": OWNER_MOBILE,
 					"customer_group": "Individual",
 					"territory": "All Territories",
 				}
 			).insert()
 		cls.customer = frappe.db.get_value("Customer", {"armak_civil_id": "_T-12345"})
+		frappe.db.set_value("Customer", cls.customer, "mobile_no", OWNER_MOBILE)
 		if not frappe.db.exists("Gun", "_T-GUN-1"):
 			frappe.get_doc(
 				{"doctype": "Gun", "gun_number": "_t-gun-1", "customer": cls.customer, "gun_type": "Rifle"}
@@ -184,7 +190,11 @@ class TestRepairOrder(FrappeTestCase):
 		self.assertEqual(order.customer_name, "_Test Gun Owner")
 		self.assertEqual(order.civil_id, "_T-12345")
 		self.assertEqual(order.status, "Draft")
-		self.assertEqual(flt(order.total), 80)
+		# 4 x 20, VAT included: the customer pays 80 and the VAT inside it is worked out
+		rate = order.vat_rate()
+		self.assertEqual(flt(order.grand_total), 80)
+		self.assertEqual(flt(order.tax_amount), flt(80 * rate / (100 + rate), order.precision("tax_amount")))
+		self.assertEqual(flt(order.total + order.tax_amount, order.precision("total")), 80)
 		self.assertEqual(len(order.materials), 1)
 		self.assertEqual(flt(order.materials[0].qty), 1.0)  # 0.25 kg per gun x 4
 
@@ -221,11 +231,12 @@ class TestRepairOrder(FrappeTestCase):
 		self.assertEqual(si.docstatus, 1)
 		self.assertEqual(si.currency, frappe.db.get_value("Company", COMPANY, "default_currency"))
 		self.assertEqual(flt(si.items[0].rate), 20)
+		self.assertEqual(flt(si.rounded_total or si.grand_total), 20)  # VAT inside the 20
 		self.assertEqual(flt(si.outstanding_amount), 0)
 		self.assertEqual(flt(si.total_advance), 5)
 		self.assertEqual(flt(order.balance), 0)
 		self.assertEqual(flt(order.advance_paid), 5)
-		self.assertEqual(flt(order.profit), 19)
+		self.assertEqual(flt(order.profit), flt(si.base_net_total) - 1)  # net of VAT less 1 of paint
 		if si.meta.has_field("branch"):  # with the Branch accounting dimension
 			self.assertEqual(si.branch, BRANCH)
 
@@ -289,8 +300,9 @@ class TestRepairOrder(FrappeTestCase):
 		filters = {"company": COMPANY, "branch": BRANCH, "from_date": nowdate(), "to_date": nowdate()}
 		_cols, rows, _msg, _chart, summary = repair_order_profit.execute(filters)
 		row = next(r for r in rows if r.name == delivered.name)
-		self.assertEqual(flt(row.profit), 19)
-		self.assertEqual(round(row.margin), 95)
+		net = frappe.db.get_value("Sales Invoice", delivered.sales_invoice, "base_net_total")
+		self.assertEqual(flt(row.profit), flt(net) - 1)
+		self.assertEqual(round(row.margin), round((flt(net) - 1) / flt(row.revenue) * 100))
 		self.assertTrue(summary)
 
 		_cols, rows, _msg, _chart = workshop_material_consumption.execute(filters)
@@ -411,3 +423,76 @@ class TestRepairOrder(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Stock Entry", order.stock_entry, "owner"), COUNTER_USER)
 		self.assertGreaterEqual(dashboard.todays_collections()["value"], flt(order.grand_total))
 		self.assertTrue(dashboard.get_board_data(BRANCH)["kpis"])
+
+	def test_prices_with_vat_on_top(self):
+		frappe.db.set_single_value("Workshop Settings", "prices_include_vat", 0)
+		try:
+			order = self.make_order()
+		finally:
+			frappe.db.set_single_value("Workshop Settings", "prices_include_vat", 1)
+		rate = order.vat_rate()
+		self.assertFalse(order.prices_include_vat)
+		self.assertEqual(flt(order.total), 20)
+		self.assertEqual(flt(order.grand_total), flt(20 + 20 * rate / 100, order.precision("grand_total")))
+
+	def test_register_by_mobile(self):
+		from armak.workshop import registration
+
+		frappe.set_user(make_user(COUNTER_USER, "Workshop Counter"))
+		first = registration.register(
+			mobile="9555 1234",
+			customer_name="_Test Mobile Owner",
+			gun_number="_t-gun-mob 1",
+			gun_type="Shotgun",
+		)
+		self.assertEqual(first["gun"], "_T-GUN-MOB 1")
+		self.assertEqual(frappe.db.get_value("Gun", first["gun"], "customer"), first["customer"])
+
+		# the same mobile, written another way, finds the same customer; no name needed
+		again = registration.register(mobile="+968 95551234", gun_number="_T-GUN-MOB 2", civil_id="_T-CIV-9")
+		self.assertEqual(again["customer"], first["customer"])
+		self.assertEqual(frappe.db.get_value("Customer", first["customer"], "armak_civil_id"), "_T-CIV-9")
+		found = registration.lookup(gun_number="_t-gun-mob 2")
+		self.assertEqual(found.name, first["customer"])
+		self.assertEqual({g.name for g in found.guns}, {"_T-GUN-MOB 1", "_T-GUN-MOB 2"})
+
+		# a gun belongs to one customer
+		with self.assertRaises(frappe.ValidationError):
+			registration.register(mobile="9555 9999", customer_name="_Test Other", gun_number="_T-GUN-MOB 1")
+		# a new customer needs a name
+		with self.assertRaises(frappe.ValidationError):
+			registration.register(mobile="9555 8888")
+
+	def test_mobile_is_required(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test No Mobile",
+				"customer_group": "Individual",
+				"territory": "All Territories",
+			}
+		).insert()
+		with self.assertRaises(frappe.ValidationError):
+			frappe.get_doc(
+				{"doctype": "Gun", "gun_number": "_T-GUN-NOMOB", "customer": customer.name}
+			).insert()
+
+	def test_notify_customer_on_whatsapp(self):
+		order = self.make_order()
+		order.submit()
+		with self.assertRaises(frappe.ValidationError):
+			order.notify_customer("WhatsApp")  # not ready yet
+		order.mark_ready()
+		order.reload()
+		link = order.notify_customer("WhatsApp")
+		self.assertTrue(link.startswith("https://wa.me/96891000001?text="))
+		self.assertIn(quote(order.name), link)
+		order.reload()
+		self.assertEqual(order.notified_via, "WhatsApp")
+		self.assertTrue(order.customer_notified_on)
+		self.assertEqual(order.notify_customer("Phone"), "tel:+96891000001")
+
+	def test_gun_card_print(self):
+		html = frappe.get_print("Gun", "_T-GUN-1", print_format="Gun Card")
+		for text in ("_Test Gun Owner", OWNER_MOBILE, "_T-12345", "_T-GUN-1", "data:image/png;base64,"):
+			self.assertIn(text, html)

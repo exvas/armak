@@ -28,6 +28,7 @@
   "job_details",
   "section_totals",
   "taxes_and_charges",
+  "prices_include_vat",
   "total",
   "tax_amount",
   "grand_total",
@@ -44,6 +45,8 @@
   "stock_entry",
   "sales_invoice",
   "delivered_on",
+  "customer_notified_on",
+  "notified_via",
   "column_break_profit",
   "material_cost",
   "profit",
@@ -82,7 +85,7 @@
   {
    "fieldname": "mobile_no",
    "fieldtype": "Data",
-   "label": "Mobile No",
+   "label": "Customer ID (Mobile)",
    "fetch_from": "customer.mobile_no",
    "read_only": 1,
    "in_global_search": 1
@@ -227,9 +230,16 @@
    "description": "VAT applied on the invoice."
   },
   {
+   "fieldname": "prices_include_vat",
+   "fieldtype": "Check",
+   "label": "Prices Include VAT",
+   "read_only": 1,
+   "description": "Taken from Workshop Settings when the order is made."
+  },
+  {
    "fieldname": "total",
    "fieldtype": "Currency",
-   "label": "Total (excl. VAT)",
+   "label": "Net Total (excl. VAT)",
    "options": "currency",
    "read_only": 1
   },
@@ -341,6 +351,22 @@
    "no_copy": 1
   },
   {
+   "fieldname": "customer_notified_on",
+   "fieldtype": "Datetime",
+   "label": "Customer Notified On",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "notified_via",
+   "fieldtype": "Data",
+   "label": "Notified Via",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1
+  },
+  {
    "fieldname": "column_break_profit",
    "fieldtype": "Column Break"
   },
@@ -375,7 +401,7 @@
   }
  ],
  "links": [],
- "modified": "2026-11-03 10:00:00.000000",
+ "modified": "2026-11-19 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Workshop",
  "name": "Repair Order",

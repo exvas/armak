@@ -117,6 +117,8 @@ def get_board_data(branch: str | None = None):
 			"grand_total",
 			"balance",
 			"branch",
+			"customer_notified_on",
+			"notified_via",
 		],
 		order_by="expected_delivery asc",
 		limit_page_length=500,
