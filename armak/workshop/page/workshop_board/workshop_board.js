@@ -278,7 +278,11 @@ class WorkshopBoard {
 				: abs < 1440
 				? __("{0} h", [Math.round(abs / 60)])
 				: __("{0} d", [Math.round(abs / 1440)]);
-		if (order.status === "Ready for Delivery") return { text: __("Ready"), cls: "" };
+		if (order.status === "Ready for Delivery") {
+			return order.customer_notified_on
+				? { text: __("Notified · {0}", [order.notified_via]), cls: "" }
+				: { text: __("Not notified yet"), cls: "is-today" };
+		}
 		if (mins < 0) return { text: __("{0} late", [span]), cls: "is-late" };
 		if (order.due_today) return { text: __("due in {0}", [span]), cls: "is-today" };
 		return {

@@ -136,13 +136,12 @@ before_tests = "armak.install.before_tests"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Customer": {
+		# the mobile number is the workshop's Customer ID: flag one already in use
+		"validate": "armak.workshop.registration.customer_validate",
+	},
+}
 
 # Scheduled Tasks
 # ---------------

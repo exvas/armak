@@ -126,7 +126,7 @@
   }
  ],
  "links": [],
- "modified": "2026-11-03 10:00:00.000000",
+ "modified": "2026-11-19 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Workshop",
  "name": "Gun",
@@ -191,5 +191,6 @@
  "show_title_field_in_link": 0,
  "title_field": "gun_number",
  "track_changes": 1,
- "quick_entry": 1
+ "quick_entry": 1,
+ "default_print_format": "Gun Card"
 }
